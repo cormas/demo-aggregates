@@ -38,16 +38,6 @@ DAggregatesModel >> buildForests [
 		agg initNeighbourhood ]
 ]
 
-{ #category : 'Old' }
-DAggregatesModel >> buildForestsAndMeadows [
-	"Create the Aggregates from trees and no trees. Each aggregate must be bigger than 2 cells, then set the compactness of the groves"
-
-	self releaseAggregateType: DAGrove.
-	self createAggregates: DAGrove from: DAPlot attribute: #tree minimumSize: 2.
-	"self theGroves do: [ :agg | agg initNeighbourhood ].
-	self spaceModel meanCompactness: DAGrove"
-]
-
 { #category : 'aggregates' }
 DAggregatesModel >> buildSmallForests [
 	"Create the Aggregates from trees. Each aggregate must be bigger than 2 cells and not belonging to an existing grove"
@@ -81,17 +71,6 @@ DAggregatesModel >> initForest [
 	(self pickRandomCells: (self cells size / 5) rounded) do: #beTree.
 
 	self buildForests.
-	DAPlot activePovSelector: #povGrove
-]
-
-{ #category : 'Old' }
-DAggregatesModel >> initForestAndMeadows [
-	"2nd init: creates groves & meadows"
-
-	<init>
-	self initForest.
-
-	self buildForestsAndMeadows.
 	DAPlot activePovSelector: #povGrove
 ]
 
@@ -137,28 +116,19 @@ DAggregatesModel >> nbOfGroves [
 	^ self theGroves size
 ]
 
-{ #category : 'Old' }
-DAggregatesModel >> stepForestAndMeadows [
-	"Each cell has a small probability of changing its state. Then each grove expands on external cells that are mostly surrounded by groves. Finally, the aggregates are rebuilt"
-
-	<control>
-	self thePlots do: [ :c | c changeState ].
-	self theGroves do: [ :a | a expand ].
-	self buildForestsAndMeadows
-]
-
 { #category : 'control' }
 DAggregatesModel >> stepMerge [
 	"Each cell has a small probability of changing its state. 
 	Then each grove expands on 10% of its external cells. 
-	Then, the aggregates are sorted from the biggest to the smallest, then each one updates its components: may integrate a smaller ones in contact (merging) or be eaten by biggers.
+	Then, the existing aggregates are sorted from the biggest to the smallest, then each one updates its components: may integrate a smaller ones in contact (merging) or be eaten by biggers.
 	Finally the scheduler checks for new groves that have been born not in contact to the previous ones "
 
 	<control>
 	self thePlots do: [ :c | c changeState ].
 	self theGroves do: [ :a | a expand ].
 	self buildSmallForests.
-	(self theGroves asSortedCollection: [ :a :b | a size > b size ]) do: #update
+	(self theGroves asSortedCollection: [ :a :b | a size > b size ]) do:
+		#mergeWithNeighbours
 ]
 
 { #category : 'control' }

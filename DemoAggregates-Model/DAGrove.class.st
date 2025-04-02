@@ -28,15 +28,8 @@ DAGrove >> expand [
 DAGrove >> mergeWithNeighbours [
 	"This grove merges with the other groves connected to it (they are destroyed)"
 
-	| surroundingCells surroundingGroves |
 	self destroyed ifTrue: [ ^ nil ].
-	surroundingCells := self surround select: [ :c |
-		                    c aggregates anySatisfy: [ :ag |
-			                    ag class = self class ] ].
-	surroundingGroves := Set new.
-	surroundingCells do: [ :c | surroundingGroves addAll: c aggregates ].
-	surroundingGroves do: [ :ag |
-		self destroyed ifFalse: [ self mergeWith: ag ] ]
+	self neighbourhood do: [ :ag |self mergeWith: ag ]
 ]
 
 { #category : 'environment - distance' }
@@ -46,10 +39,11 @@ DAGrove >> surroundSize [
 
 { #category : 'control' }
 DAGrove >> update [
-	"Updates by integrating its surrounded plots in tree. Recursivity"
+	"Updates by integrating its surrounded plots in tree. This is a recursive method"
 
 	| surroundedTrees |
-	surroundedTrees := self surround select: [ :c | c tree and: [c belongsToGrove not]].
+	surroundedTrees := self surround select: [ :c |
+		                   c tree and: [ c belongsToGrove not ] ].
 	surroundedTrees ifEmpty: [ ^ self ].
 	self addComponents: surroundedTrees.
 	self update
