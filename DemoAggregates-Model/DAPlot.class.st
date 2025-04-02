@@ -48,12 +48,21 @@ DAPlot >> initialize [
 ]
 
 { #category : 'pov' }
+DAPlot >> povGrove [
+
+	<pov>
+	^ self belongsToGrove
+		  ifTrue: [ (self getAggregateType: DAGrove) povId "CMPointOfView color: (Color fromHexString: '486862')" ]
+		  ifFalse: [ self povTree ]
+]
+
+{ #category : 'pov' }
 DAPlot >> povTree [
 
 	<pov>
 	^ tree
-		  ifTrue: [ CMPointOfView color: (Color fromHexString: '2C9931')]
-		  ifFalse: [ CMPointOfView color: Color white ]
+		  ifTrue: [ CMPointOfView color: (Color fromHexString: '2C9931') ]
+		  ifFalse: [ CMPointOfView color: (Color fromHexString: 'F6EABD') ]
 ]
 
 { #category : 'accessing' }

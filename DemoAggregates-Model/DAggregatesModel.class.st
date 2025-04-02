@@ -1,3 +1,6 @@
+"
+DemoAggregatesModel represents a landscape with trees and groves that expands.
+"
 Class {
 	#name : 'DAggregatesModel',
 	#superclass : 'CMAbstractModel',
@@ -23,20 +26,19 @@ DAggregatesModel class >> prefix [
 
 { #category : 'aggregates' }
 DAggregatesModel >> buildForests [
-	"Create the Aggregates from trees. Each aggregate must be bigger than 25 cells, then set the compactness of the groves"
+	"Release all the groves, then creates the Aggregates from trees. Each aggregate must be bigger than 2 cells"
 
 	self releaseAggregateType: DAGrove.
 	self
 		createAggregates: DAGrove
 		from: DAPlot
-		verifying: [ :aCell | 
-			aCell tree ]	
-			minimumSize: 2.
-	"self theGroves do: [ :agg | agg initNeighbourhood ].
-	self spaceModel meanCompactness: DAGrove"
+		verifying: [ :aCell | aCell tree ]
+		minimumSize: 2.
+	self theGroves do: [ :agg | "self spaceModel meanCompactness: DAGrove"
+		agg initNeighbourhood ]
 ]
 
-{ #category : 'aggregates' }
+{ #category : 'Old' }
 DAggregatesModel >> buildForestsAndMeadows [
 	"Create the Aggregates from trees and no trees. Each aggregate must be bigger than 2 cells, then set the compactness of the groves"
 
@@ -44,6 +46,19 @@ DAggregatesModel >> buildForestsAndMeadows [
 	self createAggregates: DAGrove from: DAPlot attribute: #tree minimumSize: 2.
 	"self theGroves do: [ :agg | agg initNeighbourhood ].
 	self spaceModel meanCompactness: DAGrove"
+]
+
+{ #category : 'aggregates' }
+DAggregatesModel >> buildSmallForests [
+	"Create the Aggregates from trees. Each aggregate must be bigger than 2 cells and not belonging to an existing grove"
+
+	self
+		createAggregates: DAGrove
+		from: DAPlot
+		verifying: [ :aCell | aCell tree and: [ aCell belongsToGrove not ] ]
+		minimumSize: 2.
+	self theGroves do: [ :agg |
+		agg initNeighbourhood ]
 ]
 
 { #category : 'probes' }
@@ -55,7 +70,8 @@ DAggregatesModel >> grovesAverageSize [
 
 { #category : 'initialization' }
 DAggregatesModel >> initForest [
-"1st init: just creates a grid with some trees"
+	"1st init: just creates a grid with some trees"
+
 	<init>
 	self
 		createGridNumberOfRows: 20
@@ -65,45 +81,44 @@ DAggregatesModel >> initForest [
 	(self pickRandomCells: (self cells size / 5) rounded) do: #beTree.
 
 	self buildForests.
-	DAPlot activePovSelector: #povTree
+	DAPlot activePovSelector: #povGrove
 ]
 
-{ #category : 'initialization' }
+{ #category : 'Old' }
 DAggregatesModel >> initForestAndMeadows [
-"2nd init: creates groves & meadows"
+	"2nd init: creates groves & meadows"
 
 	<init>
-	self
-		createGridNumberOfRows: 20
-		numberOfColumns: 20
-		neighbourhood: 4
-		closed: true.
-	(self pickRandomCells: (self cells size / 5) rounded) do: #beTree.
+	self initForest.
 
 	self buildForestsAndMeadows.
-	DAPlot activePovSelector: #povTree
+	DAPlot activePovSelector: #povGrove
 ]
 
 { #category : 'initialization' }
 DAggregatesModel >> initSquareForests [
-"3rd init: just creates a grid and divided it by 3 x 5 aggregates"
+	"3rd init: just creates a grid and divided it by 3 x 5 aggregates"
 
 	<init>
+	"creates the grid"
 	self
 		createGridNumberOfRows: 20
 		numberOfColumns: 20
 		neighbourhood: 4
 		closed: true.
+	"creates 15 regular aggregates"
 	self
 		createAggregates: DAGrove
 		horizontalDividers: 5
 		verticalDividers: 3.
+	"set some trees"	
 	(self pickRandomCells: (self cells size / 15) rounded) do: #beTree.
-	self theGroves first elementaryComponents do: [ :c | c beTree ].
-	(self theGroves at: 8) elementaryComponents do: [ :c | c beTree ].
-	self theGroves last elementaryComponents do: [ :c | c beTree ].
-
-	DAPlot activePovSelector: #povTree
+	self theGroves first beTree.
+	(self theGroves at: 8) beTree.
+	self theGroves last beTree.
+	"Remove previous aggregates and creates the groves"
+	self buildForests.
+	DAPlot activePovSelector: #povGrove.
 ]
 
 { #category : 'initialization' }
@@ -122,17 +137,7 @@ DAggregatesModel >> nbOfGroves [
 	^ self theGroves size
 ]
 
-{ #category : 'initialization' }
-DAggregatesModel >> stepForest [
-
-	<control>
-"Each cell has a small probability of changing its state. Then each grove expands on external cells that are mostly surrounded by groves. Finally, the aggregates are rebuilt"
-	self thePlots do: [:c | c changeState].
-	self theGroves do: [:a | a expand].
-	self buildForests
-]
-
-{ #category : 'initialization' }
+{ #category : 'Old' }
 DAggregatesModel >> stepForestAndMeadows [
 	"Each cell has a small probability of changing its state. Then each grove expands on external cells that are mostly surrounded by groves. Finally, the aggregates are rebuilt"
 
@@ -140,6 +145,32 @@ DAggregatesModel >> stepForestAndMeadows [
 	self thePlots do: [ :c | c changeState ].
 	self theGroves do: [ :a | a expand ].
 	self buildForestsAndMeadows
+]
+
+{ #category : 'control' }
+DAggregatesModel >> stepMerge [
+	"Each cell has a small probability of changing its state. 
+	Then each grove expands on 10% of its external cells. 
+	Then, the aggregates are sorted from the biggest to the smallest, then each one updates its components: may integrate a smaller ones in contact (merging) or be eaten by biggers.
+	Finally the scheduler checks for new groves that have been born not in contact to the previous ones "
+
+	<control>
+	self thePlots do: [ :c | c changeState ].
+	self theGroves do: [ :a | a expand ].
+	self buildSmallForests.
+	(self theGroves asSortedCollection: [ :a :b | a size > b size ]) do: #update
+]
+
+{ #category : 'control' }
+DAggregatesModel >> stepRebuild [
+	"Each cell has a small probability of changing its state. 
+	Then each grove expands on 10% of its external cells. 
+	Finally, the aggregates are rebuilt"
+
+	<control>
+	self thePlots do: [ :c | c changeState ].
+	self theGroves do: [ :a | a expand ].
+	self buildForests
 ]
 
 { #category : 'accessing' }
