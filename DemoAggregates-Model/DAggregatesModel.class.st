@@ -4,10 +4,6 @@ DemoAggregatesModel represents a landscape with trees and groves that expands.
 Class {
 	#name : 'DAggregatesModel',
 	#superclass : 'CMAbstractModel',
-	#instVars : [
-		'thePlots',
-		'theGroves'
-	],
 	#category : 'DemoAggregates-Model',
 	#package : 'DemoAggregates-Model'
 }
@@ -34,7 +30,8 @@ DAggregatesModel >> buildForests [
 		from: DAPlot
 		verifying: [ :aCell | aCell tree ]
 		minimumSize: 2.
-	self theGroves do: [ :agg | "self spaceModel meanCompactness: DAGrove"
+		
+	(self @@ DAGrove) do: [ :agg | "self spaceModel meanCompactness: DAGrove"
 		agg initNeighbourhood ]
 ]
 
@@ -47,15 +44,21 @@ DAggregatesModel >> buildSmallForests [
 		from: DAPlot
 		verifying: [ :aCell | aCell tree and: [ aCell belongsToGrove not ] ]
 		minimumSize: 2.
-	self theGroves do: [ :agg |
+	self groves do: [ :agg |
 		agg initNeighbourhood ]
+]
+
+{ #category : 'accessing' }
+DAggregatesModel >> groves [
+
+	^ self @@ DAGrove
 ]
 
 { #category : 'probes' }
 DAggregatesModel >> grovesAverageSize [
 
 	<probeNamed: 'Average size of the groves' color: 'FF9900'>
-	^ (self theGroves collect: [ :each | each size ]) average
+	^ (self groves collect: [ :each | each size ]) average
 ]
 
 { #category : 'initialization' }
@@ -92,28 +95,19 @@ DAggregatesModel >> initSquareForests [
 		verticalDividers: 3.
 	"set some trees"	
 	(self pickRandomCells: (self cells size / 15) rounded) do: #beTree.
-	self theGroves first beTree.
-	(self theGroves at: 8) beTree.
-	self theGroves last beTree.
+	self groves first beTree.
+	(self groves at: 8) beTree.
+	self groves last beTree.
 	"Remove previous aggregates and creates the groves"
 	self buildForests.
 	DAPlot activePovSelector: #povGrove.
-]
-
-{ #category : 'initialization' }
-DAggregatesModel >> initialize [
-
-	super initialize.
-
-	thePlots := OrderedCollection new.
-	theGroves := OrderedCollection new
 ]
 
 { #category : 'probes' }
 DAggregatesModel >> nbOfGroves [
 
 	<probeNamed: 'Number of groves' color: '00b44c'>
-	^ self theGroves size
+	^ self groves size
 ]
 
 { #category : 'control' }
@@ -124,10 +118,12 @@ DAggregatesModel >> stepMerge [
 	Finally the scheduler checks for new groves that have been born not in contact to the previous ones "
 
 	<control>
-	self thePlots do: [ :c | c changeState ].
-	self theGroves do: [ :a | a expand ].
+	(self @@ DAPlot) do: [ :c | c changeState ].
+	self groves do: [ :a | a expand ].
+	
 	self buildSmallForests.
-	(self theGroves asSortedCollection: [ :a :b | a size > b size ]) do:
+	
+	(self groves asSortedCollection: [ :a :b | a size > b size ]) do:
 		#mergeWithNeighbours
 ]
 
@@ -138,34 +134,14 @@ DAggregatesModel >> stepRebuild [
 	Finally, the aggregates are rebuilt"
 
 	<control>
-	self thePlots do: [ :c | c changeState ].
-	self theGroves do: [ :a | a expand ].
+	(self @@ DAPlot) do: [ :c | c changeState ].
+	self groves do: [ :a | a expand ].
 	self buildForests
-]
-
-{ #category : 'accessing' }
-DAggregatesModel >> theGroves [
-	<getterFor: #DAGrove>
-
-	^ theGroves
-]
-
-{ #category : 'accessing' }
-DAggregatesModel >> theGroves: anObject [
-
-	theGroves := anObject
-]
-
-{ #category : 'accessing' }
-DAggregatesModel >> thePlots [
-
-	<getterFor: #DAPlot>
-	^ thePlots
 ]
 
 { #category : 'probes' }
 DAggregatesModel >> totalSurrounds [
 
 	<probeNamed: 'Size of the groves'' surrounds' color: '3498DB'>
-	^ (self theGroves collect: [ :each | each surroundSize ]) sum
+	^ (self groves collect: [ :each | each surroundSize ]) sum
 ]

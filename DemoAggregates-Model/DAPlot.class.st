@@ -1,6 +1,6 @@
 Class {
 	#name : 'DAPlot',
-	#superclass : 'CMSpatialEntityElement',
+	#superclass : 'CMCell',
 	#instVars : [
 		'tree'
 	],
