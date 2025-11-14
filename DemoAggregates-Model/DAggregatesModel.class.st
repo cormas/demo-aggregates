@@ -14,6 +14,11 @@ DAggregatesModel class >> aboutThisModel [
 	^ ''
 ]
 
+{ #category : 'model - metadata' }
+DAggregatesModel class >> modelName [ 
+^'Demo aggregates'
+]
+
 { #category : 'as yet unclassified' }
 DAggregatesModel class >> prefix [
 
