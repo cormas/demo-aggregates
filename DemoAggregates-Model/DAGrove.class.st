@@ -32,6 +32,28 @@ DAGrove >> mergeWithNeighbours [
 	self neighbourhood do: [ :ag |self mergeWith: ag ]
 ]
 
+{ #category : 'pov' }
+DAGrove >> povFilled [
+	"Show the grove as one solid shape, with a line around it"
+
+	<pov>
+	^ (CMPointOfView color: (Color fromHexString: '486862'))
+		  borderColor: Color black;
+		  borderWidth: 0.1;
+		  yourself
+]
+
+{ #category : 'pov' }
+DAGrove >> povOutline [
+	"Show the plots of the grove, with a line around them"
+
+	<pov>
+	^ CMPointOfView new
+		  borderColor: Color black;
+		  borderWidth: 0.1;
+		  yourself
+]
+
 { #category : 'environment - distance' }
 DAGrove >> surroundSize [
  ^surround size

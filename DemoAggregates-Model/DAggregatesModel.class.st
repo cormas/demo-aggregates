@@ -79,15 +79,16 @@ DAggregatesModel >> initForest [
 	(self pickRandomCells: (self cells size / 5) rounded) do: #beTree.
 
 	self buildForests.
-	DAPlot activePovSelector: #povGrove
+	self showPlotsAndOutlinesOfGroves
 ]
 
 { #category : 'initialization' }
 DAggregatesModel >> initSquareForests [
 	"3rd init: just creates a grid and divided it by 3 x 5 aggregates"
 
-	<init>
 	"creates the grid"
+
+	<init>
 	self
 		createGridNumberOfRows: 20
 		numberOfColumns: 20
@@ -98,14 +99,14 @@ DAggregatesModel >> initSquareForests [
 		createAggregates: DAGrove
 		horizontalDividers: 5
 		verticalDividers: 3.
-	"set some trees"	
+	"set some trees"
 	(self pickRandomCells: (self cells size / 15) rounded) do: #beTree.
 	self groves first beTree.
 	(self groves at: 8) beTree.
 	self groves last beTree.
 	"Remove previous aggregates and creates the groves"
 	self buildForests.
-	DAPlot activePovSelector: #povGrove.
+	self showPlotsAndOutlinesOfGroves
 ]
 
 { #category : 'probes' }
@@ -113,6 +114,13 @@ DAggregatesModel >> nbOfGroves [
 
 	<probeNamed: 'Number of groves' color: '00b44c'>
 	^ self groves size
+]
+
+{ #category : 'initialization' }
+DAggregatesModel >> showPlotsAndOutlinesOfGroves [
+
+	DAPlot activePovSelector: #povTree.
+	DAGrove activePovSelector: #povOutline
 ]
 
 { #category : 'control' }
