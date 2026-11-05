@@ -28,8 +28,8 @@ DAGrove >> expand [
 DAGrove >> mergeWithNeighbours [
 	"This grove merges with the other groves connected to it (they are destroyed)"
 
-	self destroyed ifTrue: [ ^ nil ].
-	self neighbourhood do: [ :ag |self mergeWith: ag ]
+	self isDead ifTrue: [ ^ nil ].
+	self neighbourhood do: [ :ag | self mergeWith: ag ]
 ]
 
 { #category : 'pov' }
