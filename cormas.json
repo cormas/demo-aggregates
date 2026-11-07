@@ -1,0 +1,5 @@
+{
+	"baseline" : "DemoAggregates",
+	"summary" : "A demonstration of aggregates of spatial entities. Forest cells change state at random and groves spread over their surroundings; groves, the aggregates of adjacent forest cells, are either rebuilt at each step or grow by absorbing the smaller ones.",
+	"cormas" : "1.0-dev"
+}
