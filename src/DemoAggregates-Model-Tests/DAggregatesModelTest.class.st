@@ -30,21 +30,23 @@ Class {
 	#package : 'DemoAggregates-Model-Tests'
 }
 
-{ #category : 'private' }
+{ #category : 'tests' }
 DAggregatesModelTest >> assertShowsPlotsAndOutlinesOfGroves [
 
-	| pov |
+	| observer groveLook |
 	self assert: model groves isNotEmpty.
-	pov := model groves first activePov.
-	self assert: pov hasBorder.
-	self deny: pov hasColor.
-
+	observer := CMObserver new.
+	groveLook := observer lookOf: model groves first.
+	self assert: groveLook borderThickness > 0.
+	self assert: groveLook color alpha equals: 0.
 	self
-		assert: (model cells detect: [ :each | each tree ]) activePov color
+		assert:
+		(observer lookOf: (model cells detect: [ :each | each tree ])) color
 		equals: (Color fromHexString: '2C9931').
 	self
 		assert:
-		(model cells detect: [ :each | each tree not ]) activePov color
+			(observer lookOf: (model cells detect: [ :each | each tree not ]))
+				color
 		equals: (Color fromHexString: 'F6EABD')
 ]
 
@@ -57,14 +59,6 @@ DAggregatesModelTest >> initializeWith: anInitSelector [
 		activeInitSelector: anInitSelector;
 		activeControlSelector: #stepRebuild;
 		initializeSimulation
-]
-
-{ #category : 'running' }
-DAggregatesModelTest >> tearDown [
-
-	DAPlot resetActivePovSelector.
-	DAGrove resetActivePovSelector.
-	super tearDown
 ]
 
 { #category : 'tests' }
@@ -90,14 +84,13 @@ DAggregatesModelTest >> testExpandAddsCellsToTheGrove [
 { #category : 'tests' }
 DAggregatesModelTest >> testFilledGroveHasAColorAndAnOutline [
 
-	| pov |
+	| observer look |
 	self initializeWith: #initForest.
-
-	DAGrove activePovSelector: #povFilled.
-	pov := model groves first activePov.
-
-	self assert: pov hasColor.
-	self assert: pov hasBorder
+	observer := CMObserver new.
+	observer perspective: model perspectiveFilledGroves.
+	look := observer lookOf: model groves first.
+	self assert: look color alpha > 0.
+	self assert: look borderThickness > 0
 ]
 
 { #category : 'tests' }
@@ -120,8 +113,7 @@ DAggregatesModelTest >> testInitSquareForestsShowsPlotsAndOutlinesOfGroves [
 DAggregatesModelTest >> testRebuildingTheGrovesKeepsTheirOutlines [
 
 	self initializeWith: #initForest.
-
 	model buildForests.
-
-	self assert: model groves first activePov hasBorder
+	self assert:
+		(CMObserver new lookOf: model groves first) borderThickness > 0
 ]

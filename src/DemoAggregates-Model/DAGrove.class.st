@@ -5,6 +5,27 @@ Class {
 	#package : 'DemoAggregates-Model'
 }
 
+{ #category : 'aspects' }
+DAGrove >> aspectDefault: look [
+	"Show the plots of the grove, with a line around them"
+
+	<aspect>
+	look
+		borderColor: Color black;
+		borderThickness: 0.1
+]
+
+{ #category : 'aspects' }
+DAGrove >> aspectFilled: look [
+	"Show the grove as one solid shape, with a line around it"
+
+	<aspect>
+	look
+		color: (Color fromHexString: '486862');
+		borderColor: Color black;
+		borderThickness: 0.1
+]
+
 { #category : 'initialize' }
 DAGrove >> beTree [
 
@@ -30,28 +51,6 @@ DAGrove >> mergeWithNeighbours [
 
 	self isDead ifTrue: [ ^ nil ].
 	self neighbourhood do: [ :ag | self mergeWith: ag ]
-]
-
-{ #category : 'pov' }
-DAGrove >> povFilled [
-	"Show the grove as one solid shape, with a line around it"
-
-	<pov>
-	^ (CMPointOfView color: (Color fromHexString: '486862'))
-		  borderColor: Color black;
-		  borderWidth: 0.1;
-		  yourself
-]
-
-{ #category : 'pov' }
-DAGrove >> povOutline [
-	"Show the plots of the grove, with a line around them"
-
-	<pov>
-	^ CMPointOfView new
-		  borderColor: Color black;
-		  borderWidth: 0.1;
-		  yourself
 ]
 
 { #category : 'environment - distance' }

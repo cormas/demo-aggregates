@@ -66,7 +66,7 @@ DAggregatesModel >> grovesAverageSize [
 	^ (self groves collect: [ :each | each size ]) average
 ]
 
-{ #category : 'initialization' }
+{ #category : 'init' }
 DAggregatesModel >> initForest [
 	"1st init: just creates a grid with some trees"
 
@@ -77,12 +77,10 @@ DAggregatesModel >> initForest [
 		neighbourhood: 4
 		closed: true.
 	(self pickRandomCells: (self cells size / 5) rounded) do: #beTree.
-
-	self buildForests.
-	self showPlotsAndOutlinesOfGroves
+	self buildForests
 ]
 
-{ #category : 'initialization' }
+{ #category : 'init' }
 DAggregatesModel >> initSquareForests [
 	"3rd init: just creates a grid and divided it by 3 x 5 aggregates"
 
@@ -105,8 +103,7 @@ DAggregatesModel >> initSquareForests [
 	(self groves at: 8) beTree.
 	self groves last beTree.
 	"Remove previous aggregates and creates the groves"
-	self buildForests.
-	self showPlotsAndOutlinesOfGroves
+	self buildForests
 ]
 
 { #category : 'probes' }
@@ -116,11 +113,12 @@ DAggregatesModel >> nbOfGroves [
 	^ self groves size
 ]
 
-{ #category : 'initialization' }
-DAggregatesModel >> showPlotsAndOutlinesOfGroves [
+{ #category : 'perspectives' }
+DAggregatesModel >> perspectiveFilledGroves [
+	"Show each grove as one solid shape over its plots"
 
-	DAPlot activePovSelector: #povTree.
-	DAGrove activePovSelector: #povOutline
+	<perspective>
+	^ CMPerspective new show: DAGrove as: #aspectFilled:
 ]
 
 { #category : 'control' }

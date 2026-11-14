@@ -8,6 +8,15 @@ Class {
 	#package : 'DemoAggregates-Model'
 }
 
+{ #category : 'aspects' }
+DAPlot >> aspectDefault: look [
+
+	<aspect>
+	look color: (tree
+			 ifTrue: [ Color fromHexString: '2C9931' ]
+			 ifFalse: [ Color fromHexString: 'F6EABD' ])
+]
+
 { #category : 'accessing' }
 DAPlot >> beEmpty [
 
@@ -45,15 +54,6 @@ DAPlot >> initialize [
 
 	super initialize.
 	tree := false.
-]
-
-{ #category : 'pov' }
-DAPlot >> povTree [
-
-	<pov>
-	^ tree
-		  ifTrue: [ CMPointOfView color: (Color fromHexString: '2C9931') ]
-		  ifFalse: [ CMPointOfView color: (Color fromHexString: 'F6EABD') ]
 ]
 
 { #category : 'accessing' }
